@@ -1,6 +1,52 @@
 # -*- coding: utf-8 -*-
-require 'pp'
+require 'rjb'
 class Blacksmith
+  SUMMARIZED_TAGS = {"$" => "ELSE",
+      "``" => "ELSE",
+      "''" => "ELSE",
+      "(" => "ELSE",
+      ")" => "ELSE",
+      "," => "ELSE",
+      "--" => "ELSE",
+      "." => "ELSE",
+      ":" => "ELSE",
+      "CC" => "CONPREP",
+      "CD" => "NUMBER",
+      "DT" => "ADVERB",
+      "EX" => "VERB",
+      "FW" => "FORWORD",
+      "IN" => "CONPREP",
+      "JJ" => "ADJECT",
+      "JJR" => "ADJECT",
+      "JJS" => "ADJECT",
+      "LS" => "ELSE",
+      "MD" => "VERB",
+      "NN" => "NOUN",
+      "NNP" => "NOUN",
+      "NNPS" => "NOUN",
+      "NNS" => "NOUN",
+      "PDT" => "ADVERB",
+      "POS" => "POS",
+      "PRP" => "NOUN",
+      "PRP$" => "NOUN",
+      "RB" => "ADVERB",
+      "RBR" => "ADVERB",
+      "RBS" => "ADVERB",
+      "RP" => "ADVERB",
+      "SYM" => "ELSE",
+      "TO" => "CONPREP",
+      "UH" => "ELSE",
+      "VB" => "VERB",
+      "VBD" => "VERB",
+      "VBG" => "VERB",
+      "VBN" => "VERB",
+      "VBP" => "VERB",
+      "VBZ" => "VERB",
+      "WDT" => "ADVERB",
+      "WP" => "NOUN",
+      "WP$" => "NOUN",
+      "WRB" => "ADVERB"}
+
   attr_reader :dbpedia_info, :sentences
 
   def _load_object(filename)
@@ -20,6 +66,10 @@ class Blacksmith
 
   def initialize(sentences)
     @sentences = sentences
+
+    Rjb::load('lib/stanford-postagger-2013-04-04/stanford-postagger-3.1.5.jar', ['-mx300m'])
+    maxent_tagger = Rjb::import('edu.stanford.nlp.tagger.maxent.MaxentTagger')
+    @pos_tagger = maxent_tagger.new('lib/stanford-postagger-2013-04-04/models/wsj-0-18-bidirectional-nodistsim.tagger')
   end
 
   def isolate_ids_and_pure_text(sentence)
@@ -106,5 +156,24 @@ class Blacksmith
     end
 
     return [left.strip, inside_window.strip, right.strip]
+  end
+
+  def extract_tags(tagged_string)
+    tagged_tokens = tagged_string.split(" ")
+    tags = []
+
+    tagged_tokens.each do |tt|
+      tags.push(SUMMARIZED_TAGS[tt.split("_")[1]])
+    end
+
+    return tags
+  end
+
+  def pos_tag_windows(windows)
+    interest = windows[1]
+    
+    tagged_string = @pos_tagger.tagString(interest)
+
+    return extract_tags(tagged_string)
   end
 end

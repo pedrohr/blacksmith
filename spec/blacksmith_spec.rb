@@ -2,9 +2,7 @@
 require 'test/unit'
 require './src/blacksmith.rb'
 
-class BlacksmitTest < Test::Unit::TestCase
-  def setup
-    @sentences = [['</Anarchism> is often defined as a </Political_philosophy> which holds the state to be undesirable, unnecessary, or harmful', '/philosophy'],
+SENTENCES = [['</Anarchism> is often defined as a </Political_philosophy> which holds the state to be undesirable, unnecessary, or harmful', '/philosophy'],
      ['</Anarchism> as a mass </Social_movement> has regularly endured fluctuations in popularity', '/partOf'],
      ["The central tendency of </Anarchism> as a </Social_movement> has been represented by anarcho-communism and anarcho-syndicalism, with individualist anarchism being primarily a literary phenomenon which nevertheless did have an impact on the bigger currents and individualists have also participated in large anarchist organizations", '/partOf']]
 
@@ -13,8 +11,62 @@ class BlacksmitTest < Test::Unit::TestCase
     #  {"/Political_philosophy" => "/philosophy", "/Social_movement" => "/partOf"},
     #  "/Irving_Shulman"=> {"/Rebel_without_a_case" => "/wrote"}}
 
-    @blacksmith = Blacksmith.new(@sentences)
+
+BLACKSMITH = Blacksmith.new(SENTENCES)
+
+class BlacksmitTest < Test::Unit::TestCase
+  def setup
+    # NOUN, VERB, ADVERB, ADJECT, NUMBER, CONPREP, POS, FORWORD, ELSE
+    @summarized_tags = {"$" => "ELSE",
+      "``" => "ELSE",
+      "''" => "ELSE",
+      "(" => "ELSE",
+      ")" => "ELSE",
+      "," => "ELSE",
+      "--" => "ELSE",
+      "." => "ELSE",
+      ":" => "ELSE",
+      "CC" => "CONPREP",
+      "CD" => "NUMBER",
+      "DT" => "ADVERB",
+      "EX" => "VERB",
+      "FW" => "FORWORD",
+      "IN" => "CONPREP",
+      "JJ" => "ADJECT",
+      "JJR" => "ADJECT",
+      "JJS" => "ADJECT",
+      "LS" => "ELSE",
+      "MD" => "VERB",
+      "NN" => "NOUN",
+      "NNP" => "NOUN",
+      "NNPS" => "NOUN",
+      "NNS" => "NOUN",
+      "PDT" => "ADVERB",
+      "POS" => "POS",
+      "PRP" => "NOUN",
+      "PRP$" => "NOUN",
+      "RB" => "ADVERB",
+      "RBR" => "ADVERB",
+      "RBS" => "ADVERB",
+      "RP" => "ADVERB",
+      "SYM" => "ELSE",
+      "TO" => "CONPREP",
+      "UH" => "ELSE",
+      "VB" => "VERB",
+      "VBD" => "VERB",
+      "VBG" => "VERB",
+      "VBN" => "VERB",
+      "VBP" => "VERB",
+      "VBZ" => "VERB",
+      "WDT" => "ADVERB",
+      "WP" => "NOUN",
+      "WP$" => "NOUN",
+      "WRB" => "ADVERB"}
+
+    @sentences = SENTENCES
+    @blacksmith = BLACKSMITH
   end
+
 
   def test_should_load_sentences
     assert_equal(@blacksmith.sentences, @sentences)
@@ -38,5 +90,17 @@ class BlacksmitTest < Test::Unit::TestCase
     assert_equal(@blacksmith.extract_windows(@sentences[0][0], 2), ["", "is often defined as a", "which holds"])
     assert_equal(@blacksmith.extract_windows(@sentences[1][0], 2), ["", "as a mass", "has regularly"])
     assert_equal(@blacksmith.extract_windows(@sentences[2][0], 2), ["tendency of", "as a", "has been"])
+  end
+
+  def test_shuold_extract_tags
+    assert_equal(@blacksmith.extract_tags("is_VBZ often_RB defined_VBN as_IN a_DT"), ["VERB", "ADVERB", "VERB", "CONPREP", "ADVERB"])
+    assert_equal(@blacksmith.extract_tags("as_IN a_DT mass_NN"), ["CONPREP", "ADVERB", "NOUN"])
+    assert_equal(@blacksmith.extract_tags("as_IN a_DT"), ["CONPREP", "ADVERB"])
+  end
+
+  def test_should_apply_a_POS_tagger_on_the_inside_window
+    assert_equal(@blacksmith.pos_tag_windows(["", "as a mass", "has regularly"]), ["CONPREP", "ADVERB", "NOUN"])
+    assert_equal(@blacksmith.pos_tag_windows(["", "is often defined as a", "which holds"]), ["VERB", "ADVERB", "VERB", "CONPREP", "ADVERB"])
+    assert_equal(@blacksmith.pos_tag_windows(["tendency of", "as a", "has been"]), ["CONPREP", "ADVERB"])
   end
 end
