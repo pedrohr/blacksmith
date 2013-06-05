@@ -64,12 +64,38 @@ class Blacksmith
     end
   end
 
-  def initialize(sentences)
-    @sentences = sentences
-
+  def load_pos_tagger
     Rjb::load('lib/stanford-postagger-2013-04-04/stanford-postagger-3.1.5.jar', ['-mx300m'])
     maxent_tagger = Rjb::import('edu.stanford.nlp.tagger.maxent.MaxentTagger')
     @pos_tagger = maxent_tagger.new('lib/stanford-postagger-2013-04-04/models/wsj-0-18-bidirectional-nodistsim.tagger')
+  end
+
+  def load_stanford_parser
+    Rjb::load('lib/stanford-parser-2013-04-05/stanford-parser.jar', ['-mx300m'])
+
+    lp = Rjb::import('edu.stanford.nlp.parser.lexparser.LexicalizedParser')
+    @lexicalized_parser = lp.loadModel("lib/stanford-parser-2013-04-05/englishPCFG.ser.gz", [])
+
+    Rjb::import('java.util.List')
+    Rjb::import('java.io.Reader')
+    Rjb::import('java.util.Iterator')
+    Rjb::import('edu.stanford.nlp.ling.HasWord')
+    Rjb::import('edu.stanford.nlp.ling.Sentence')
+    Rjb::import('edu.stanford.nlp.trees.Tree')
+
+    ptlp = Rjb::import('edu.stanford.nlp.trees.PennTreebankLanguagePack')
+
+    @grammaticalStructureFactory = ptlp.new().grammaticalStructureFactory()
+    @javaDocPreProcessor = Rjb::import('edu.stanford.nlp.process.DocumentPreprocessor')
+    @javaStringReader = Rjb::import('java.io.StringReader')
+  end
+
+  def initialize(sentences)
+    @sentences = sentences
+
+    #load_pos_tagger()
+    
+    load_stanford_parser
   end
 
   def isolate_ids_and_pure_text(sentence)
@@ -175,5 +201,25 @@ class Blacksmith
     tagged_string = @pos_tagger.tagString(interest)
 
     return extract_tags(tagged_string)
+  end
+
+  def dependency_path(sentence)
+    paths = []
+
+    list_sentences = @javaDocPreProcessor.new(@javaStringReader.new(sentence))
+
+    it = list_sentences.iterator()
+    while it.hasNext()
+      sentence = it.next()
+      parse = @lexicalized_parser.apply(sentence)
+      dp = @grammaticalStructureFactory.newGrammaticalStructure(parse).typedDependenciesCCprocessed().toString()
+
+      dp = dp[1..dp.size-2]
+      dp = dp.split("),").map{|e| e.strip + ")"}
+      
+      paths.push(dp.sort)
+    end
+
+    return paths.flatten
   end
 end
