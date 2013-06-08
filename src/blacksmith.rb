@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 require 'rjb'
+require 'pp'
 class Blacksmith
   SUMMARIZED_TAGS = {"$" => "ELSE",
       "``" => "ELSE",
@@ -105,7 +106,7 @@ class Blacksmith
     return [""] if sentence.empty?
 
     sentence.split(" ").each do |token|
-      if (token.include?("</"))
+      if (token.include?("<") and token.include?(">"))
         
         left = token.match(/(.+)<.+/)
         unless left.nil?
@@ -148,11 +149,11 @@ class Blacksmith
     second_entity = false
     
     tokens.each do |token|
-      if token.include?("</")
+      if (token.include?("<") and token.include?(">"))
         unless first_entity
-          first_entity = true
+          first_entity = token
         else
-          second_entity = true
+          second_entity = token
         end
       elsif (first_entity)
         if (second_entity)
@@ -181,7 +182,14 @@ class Blacksmith
       end
     end
 
-    return [left.strip, inside_window.strip, right.strip]
+    first_entity = first_entity[1..first_entity.length-2].split("/")
+    second_entity = second_entity[1..second_entity.length-2].split("/")
+
+    return {
+      "windows" => [left.strip, inside_window.strip, right.strip], 
+      "entities" => [[first_entity[0].gsub("_", " "), "/" + first_entity[1]], 
+                     [second_entity[0].gsub("_", " "), "/" + second_entity[1]]]
+    }
   end
 
   def extract_tags(tagged_string)
@@ -195,8 +203,8 @@ class Blacksmith
     return tags
   end
 
-  def pos_tag_windows(windows)
-    interest = windows[1]
+  def pos_tag_windows(windows_info)
+    interest = windows_info["windows"][1]
     
     tagged_string = @pos_tagger.tagString(interest)
 

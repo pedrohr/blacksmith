@@ -2,9 +2,21 @@
 require 'test/unit'
 require './src/blacksmith.rb'
 
-SENTENCES = [['</Anarchism> is often defined as a </Political_philosophy> which holds the state to be undesirable, unnecessary, or harmful', '/philosophy'],
-     ['</Anarchism> as a mass </Social_movement> has regularly endured fluctuations in popularity', '/partOf'],
-     ["The central tendency of </Anarchism> as a </Social_movement> has been represented by anarcho-communism and anarcho-syndicalism, with individualist anarchism being primarily a literary phenomenon which nevertheless did have an impact on the bigger currents and individualists have also participated in large anarchist organizations", '/partOf']]
+SENTENCES = [['<Anarchism/Anarchism> is often defined as a <political_philosophy/Political_philosophy> which holds the state to be undesirable, unnecessary, or harmful', '/philosophy'],
+             ['<Anarchism/Anarchism> as a mass <social_movement/Social_movement> has regularly endured fluctuations in popularity', '/partOf'],
+             ["The central tendency of <anarchism/Anarchism> as a <social_movement/Social_movement> has been represented by anarcho-communism and anarcho-syndicalism, with individualist anarchism being primarily a literary phenomenon which nevertheless did have an impact on the bigger currents and individualists have also participated in large anarchist organizations", '/partOf']]
+
+WINDOWS_SIZE_0 = [{"windows" => ["", "is often defined as a", ""], "entities" => [["Anarchism", "/Anarchism"], ["political philosophy", "/Political_philosophy"]]},
+                  {"windows" => ["", "as a mass", ""], "entities" => [["Anarchism", "/Anarchism"],["social movement", "/Social_movement"]]},
+                  {"windows" => ["", "as a", ""], "entities" => [["anarchism", "/Anarchism"], ["social movement", "/Social_movement"]]}]
+
+WINDOWS_SIZE_1 = [{"windows" => ["", "is often defined as a", "which"], "entities" => [["Anarchism", "/Anarchism"], ["political philosophy", "/Political_philosophy"]]},
+                  {"windows" => ["", "as a mass", "has"], "entities" => [["Anarchism", "/Anarchism"],["social movement", "/Social_movement"]]},
+                 {"windows" => ["of", "as a", "has"], "entities" => [["anarchism", "/Anarchism"], ["social movement", "/Social_movement"]]}]
+
+WINDOWS_SIZE_2 = [{"windows" => ["", "is often defined as a", "which holds"], "entities" => [["Anarchism", "/Anarchism"], ["political philosophy", "/Political_philosophy"]]},
+                  {"windows" => ["", "as a mass", "has regularly"], "entities" => [["Anarchism", "/Anarchism"],["social movement", "/Social_movement"]]},
+                  {"windows" => ["tendency of", "as a", "has been"], "entities" => [["anarchism", "/Anarchism"], ["social movement", "/Social_movement"]]}]
 
     # Example of dbpedia_relations:
     # {"/Anarchism"=>
@@ -73,23 +85,23 @@ class BlacksmitTest < Test::Unit::TestCase
   end
 
   def test_should_isolate_ids_and_pure_text
-    assert_equal(@blacksmith.isolate_ids_and_pure_text('</Anarchism> is often defined as a </Political_philosophy> which holds the state to be undesirable, unnecessary, or harmful'), ['</Anarchism>', 'is often defined as a', '</Political_philosophy>', 'which holds the state to be undesirable, unnecessary, or harmful'])
-    assert_equal(@blacksmith.isolate_ids_and_pure_text('</Anarchism> as a mass </Social_movement> has regularly endured fluctuations in popularity'), ['</Anarchism>', 'as a mass', '</Social_movement>', 'has regularly endured fluctuations in popularity'])
-    assert_equal(@blacksmith.isolate_ids_and_pure_text("The so-called-</Anarchism>'s father is </John>"), ["The so-called-", "</Anarchism>", "'s father is", "</John>"])
+    assert_equal(@blacksmith.isolate_ids_and_pure_text('<Anarchism/Anarchism> is often defined as a <political_philosophy/Political_philosophy> which holds the state to be undesirable, unnecessary, or harmful'), ['<Anarchism/Anarchism>', 'is often defined as a', '<political_philosophy/Political_philosophy>', 'which holds the state to be undesirable, unnecessary, or harmful'])
+    assert_equal(@blacksmith.isolate_ids_and_pure_text('<Anarchism/Anarchism> as a mass <social_movement/Social_movement> has regularly endured fluctuations in popularity'), ['<Anarchism/Anarchism>', 'as a mass', '<social_movement/Social_movement>', 'has regularly endured fluctuations in popularity'])
+    assert_equal(@blacksmith.isolate_ids_and_pure_text("The so-called-<anarchism/Anarchism>'s father is <John/John>"), ["The so-called-", "<anarchism/Anarchism>", "'s father is", "<John/John>"])
   end
 
   def test_should_extract_windows
-    assert_equal(@blacksmith.extract_windows(@sentences[0][0], 0), ["", "is often defined as a", ""])
-    assert_equal(@blacksmith.extract_windows(@sentences[1][0], 0), ["", "as a mass", ""])
-    assert_equal(@blacksmith.extract_windows(@sentences[2][0], 0), ["", "as a", ""])
+    [0,1,2].each do |i|
+      assert_equal(@blacksmith.extract_windows(@sentences[i][0], 0), WINDOWS_SIZE_0[i])
+    end
 
-    assert_equal(@blacksmith.extract_windows(@sentences[0][0], 1), ["", "is often defined as a", "which"])
-    assert_equal(@blacksmith.extract_windows(@sentences[1][0], 1), ["", "as a mass", "has"])
-    assert_equal(@blacksmith.extract_windows(@sentences[2][0], 1), ["of", "as a", "has"])
+    [0,1,2].each do |i|
+      assert_equal(@blacksmith.extract_windows(@sentences[i][0], 1), WINDOWS_SIZE_1[i])
+    end
 
-    assert_equal(@blacksmith.extract_windows(@sentences[0][0], 2), ["", "is often defined as a", "which holds"])
-    assert_equal(@blacksmith.extract_windows(@sentences[1][0], 2), ["", "as a mass", "has regularly"])
-    assert_equal(@blacksmith.extract_windows(@sentences[2][0], 2), ["tendency of", "as a", "has been"])
+    [0,1,2].each do |i|
+      assert_equal(@blacksmith.extract_windows(@sentences[i][0], 2), WINDOWS_SIZE_2[i])
+    end
   end
 
   def test_shuold_extract_tags
@@ -99,19 +111,13 @@ class BlacksmitTest < Test::Unit::TestCase
   end
 
   def test_should_apply_a_POS_tagger_on_the_inside_window
-    assert_equal(@blacksmith.pos_tag_windows(["", "as a mass", "has regularly"]), ["CONPREP", "ADVERB", "NOUN"])
-    assert_equal(@blacksmith.pos_tag_windows(["", "is often defined as a", "which holds"]), ["VERB", "ADVERB", "VERB", "CONPREP", "ADVERB"])
-    assert_equal(@blacksmith.pos_tag_windows(["tendency of", "as a", "has been"]), ["CONPREP", "ADVERB"])
+    assert_equal(@blacksmith.pos_tag_windows(WINDOWS_SIZE_2[0]), ["VERB", "ADVERB", "VERB", "CONPREP", "ADVERB"])
+    assert_equal(@blacksmith.pos_tag_windows(WINDOWS_SIZE_2[1]), ["CONPREP", "ADVERB", "NOUN"])
+    assert_equal(@blacksmith.pos_tag_windows(WINDOWS_SIZE_2[2]), ["CONPREP", "ADVERB"])
   end
 
   # collapsed dependency path
   def test_should_extract_dependency_path
-    assert_equal(@blacksmith.dependency_path("Astronomer Edwin Hubble was born in Marshfield, Missourdi."), ["auxpass(born-5, was-4)",
- "nn(Hubble-3, Astronomer-1)",
- "nn(Hubble-3, Edwin-2)",
- "nn(Missourdi-9, Marshfield-7)",
- "nsubjpass(born-5, Hubble-3)",
- "prep_in(born-5, Missourdi-9))",
- "root(ROOT-0, born-5)"])
+    assert_equal(@blacksmith.dependency_path("Astronomer Edwin Hubble was born in Marshfield, Missourdi."), ["auxpass(born-5, was-4)", "nn(Hubble-3, Astronomer-1)", "nn(Hubble-3, Edwin-2)", "nn(Missourdi-9, Marshfield-7)", "nsubjpass(born-5, Hubble-3)", "prep_in(born-5, Missourdi-9))", "root(ROOT-0, born-5)"])
   end
 end
