@@ -255,4 +255,35 @@ class Blacksmith
 
     return paths.flatten
   end
+
+  def dependency_path_window(window_size_2)
+    left_window = [""]
+    right_window = [""]
+
+    left_window.push(window_size_2["entities"][0][0].split(" "))
+    right_window.push(window_size_2["entities"][1][0].split(" "))
+
+    left_window.flatten!
+    right_window.flatten!
+
+    lw = window_size_2["windows"][0].split(" ")
+    while left_window.size < 3 and lw.size != 0 do
+      left_window.push(lw.pop)
+    end
+
+    rw = window_size_2["windows"][1].split(" ").reverse!
+    while right_window.size < 3 and lw.size != 0 do
+      right_window.push(rw.pop)
+    end
+
+    dp_window = []
+    left_window.each do |l|
+      right_window.each do |r|
+        sentence = l + " " + window_size_2["windows"][1] + " " + r
+        dp_window.push(dependency_path(sentence))
+      end
+    end
+
+    return dp_window
+  end
 end
