@@ -280,7 +280,7 @@ class Blacksmith
     left_window.each do |l|
       right_window.each do |r|
         sentence = l + " " + window_size_2["windows"][1] + " " + r
-        dp_window.push(dependency_path(sentence))
+        dp_window.push(filter_dependency_path(dependency_path(sentence)))
       end
     end
 

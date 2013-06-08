@@ -142,15 +142,15 @@ class BlacksmitTest < Test::Unit::TestCase
   def test_should_apply_a_dependecy_parser_on_a_window
     assert_equal(@blacksmith.dependency_path_window(WINDOWS_SIZE_2[2]),
                  [
-                  ["dep(as-1, a-2)", "root(ROOT-0, as-1)"],
-                  ["det(social-3, a-2)", "pobj(as-1, social-3)", "root(ROOT-0, as-1)"],
-                  ["det(movement-3, a-2)", "pobj(as-1, movement-3)", "root(ROOT-0, as-1)"],
-                  ["advmod(a-3, as-2)", "dobj(anarchism-1, a-3)", "root(ROOT-0, anarchism-1)"],
-                  ["det(social-4, a-3)", "prep_as(anarchism-1, social-4)", "root(ROOT-0, anarchism-1)"],
-                  ["det(movement-4, a-3)", "prep_as(anarchism-1, movement-4)", "root(ROOT-0, anarchism-1)"],
-                  ["advmod(a-3, as-2)", "pobj(of-1, a-3)", "root(ROOT-0, of-1)"],
-                  ["advmod(social-4, as-2)", "det(social-4, a-3)", "pobj(of-1, social-4)", "root(ROOT-0, of-1)"],
-                  ["cc(movement-4, as-2)", "det(movement-4, a-3)", "root(ROOT-0, movement-4)"]
+                  ["dep(1, 2)", "root(0, 1)"],
+                  ["det(3, 2)", "pobj(1, 3)", "root(0, 1)"],
+                  ["det(3, 2)", "pobj(1, 3)", "root(0, 1)"],
+                  ["advmod(3, 2)", "dobj(1, 3)", "root(0, 1)"],
+                  ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"],
+                  ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"],
+                  ["advmod(3, 2)", "pobj(1, 3)", "root(0, 1)"],
+                  ["advmod(4, 2)", "det(4, 3)", "pobj(1, 4)", "root(0, 1)"],
+                  ["cc(4, 2)", "det(4, 3)", "root(0, 4)"]
                  ])
   end
 
