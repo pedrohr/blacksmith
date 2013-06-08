@@ -118,6 +118,18 @@ class BlacksmitTest < Test::Unit::TestCase
 
   # collapsed dependency path
   def test_should_extract_dependency_path
-    assert_equal(@blacksmith.dependency_path("Astronomer Edwin Hubble was born in Marshfield, Missourdi."), ["auxpass(born-5, was-4)", "nn(Hubble-3, Astronomer-1)", "nn(Hubble-3, Edwin-2)", "nn(Missourdi-9, Marshfield-7)", "nsubjpass(born-5, Hubble-3)", "prep_in(born-5, Missourdi-9))", "root(ROOT-0, born-5)"])
+    assert_equal(@blacksmith.dependency_path("Astronomer Edwin Hubble was born in Marshfield, Missourdi."), ["auxpass(born-5, was-4)", "nn(Hubble-3, Astronomer-1)", "nn(Hubble-3, Edwin-2)", "nn(Missourdi-9, Marshfield-7)", "nsubjpass(born-5, Hubble-3)", "prep_in(born-5, Missourdi-9)", "root(ROOT-0, born-5)"])
+    assert_equal(@blacksmith.dependency_path("Anarchism is often defined as a political philosophy"), ["advmod(defined-4, often-3)", "amod(philosophy-8, political-7)", "auxpass(defined-4, is-2)", "det(philosophy-8, a-6)", "nsubjpass(defined-4, Anarchism-1)", "prep_as(defined-4, philosophy-8)", "root(ROOT-0, defined-4)"])
+    assert_equal(@blacksmith.dependency_path("Anarchism as a mass social movement"), ["amod(movement-6, mass-4)", "amod(movement-6, social-5)", "det(movement-6, a-3)", "prep_as(Anarchism-1, movement-6)", "root(ROOT-0, Anarchism-1)"])
+  end
+
+  def test_should_filter_dependency_path
+    assert_equal(@blacksmith.filter_dependency_path(["advmod(defined-4, often-3)", "amod(philosophy-8, political-7)", "auxpass(defined-4, is-2)", "det(philosophy-8, a-6)", "nsubjpass(defined-4, Anarchism-1)", "prep_as(defined-4, philosophy-8)", "root(ROOT-0, defined-4)"]), ["advmod(4, 3)", "amod(8, 7)", "auxpass(4, 2)", "det(8, 6)", "nsubjpass(4, 1)", "prep_as(4, 8)", "root(0, 4)"]);
+    assert_equal(@blacksmith.filter_dependency_path(["amod(movement-6, mass-4)", "amod(movement-6, social-5)", "det(movement-6, a-3)", "prep_as(Anarchism-1, movement-6)", "root(ROOT-0, Anarchism-1)"]), ["amod(6, 4)", "amod(6, 5)", "det(6, 3)", "prep_as(1, 6)", "root(0, 1)"])
+  end
+
+  def test_should_apply_a_dependecy_parser_on_a_window
+    return false
+    assert_equal(@blacksmith.depedency_path_window(WINDOWS_SIZE_0[0]), )
   end
 end

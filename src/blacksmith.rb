@@ -211,6 +211,16 @@ class Blacksmith
     return extract_tags(tagged_string)
   end
 
+  def filter_dependency_path(dependency_path)
+    filtered_dp = []
+    dependency_path.each do |rel|
+      rel = rel.split("(")
+      indexes = rel[1].scan(/\d/)
+      filtered_dp.push(rel[0] + "(" + indexes[0] + ", " + indexes[1] + ")")
+    end
+    return filtered_dp
+  end
+
   def dependency_path(sentence)
     paths = []
 
@@ -223,9 +233,24 @@ class Blacksmith
       dp = @grammaticalStructureFactory.newGrammaticalStructure(parse).typedDependenciesCCprocessed().toString()
 
       dp = dp[1..dp.size-2]
-      dp = dp.split("),").map{|e| e.strip + ")"}
-      
-      paths.push(dp.sort)
+
+      dp = dp.split(",")
+
+      path = []
+      component = ""
+      push = false
+      dp.each do |el|
+        unless push
+          component = el
+          push = true
+        else
+          path.push((component + "," + el).strip)
+          push = false
+          component = ""
+        end
+      end
+
+      paths.push(path.sort)
     end
 
     return paths.flatten
