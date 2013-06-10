@@ -24,7 +24,9 @@ WINDOWS_SIZE_2 = [{"windows" => ["", "is often defined as a", "which holds"], "e
     #  "/Irving_Shulman"=> {"/Rebel_without_a_case" => "/wrote"}}
 
 
-BLACKSMITH = Blacksmith.new(SENTENCES)
+BLACKSMITH = Blacksmith.new(SENTENCES, "./spec/mocks/classes.gz")
+
+CLASSES_MOCK = {"/Autism" => "/Disease", "/Animal_Farm" => "/Book", "/Aristotle" => "/Philosopher"}
 
 class BlacksmitTest < Test::Unit::TestCase
   def setup
@@ -154,5 +156,84 @@ class BlacksmitTest < Test::Unit::TestCase
                  ])
   end
 
-  
+  def test_should_extract_entities_class
+    assert_equal(@blacksmith.extract_classes(WINDOWS_SIZE_0[0]), ["owl:Thing", "owl:Thing"])
+    assert_equal(@blacksmith.extract_classes({'entities' => [["", "/Autism"],["", "/Aristotle"]]}), ["/Disease", "/Philosopher"])
+  end
+
+  def test_should_extract_features
+    @features_0 = ["is often defined as a",
+                   ["VERB", "ADVERB", "VERB", "CONPREP", "ADVERB"],
+                   "",
+                   [],
+                   "which",
+                   ["ADVERB"],
+                   "",
+                   [],
+                   "which holds",
+                   ["ADVERB", "VERB"],
+                   ["advmod(5, 4)", "advmod(3, 2)", "auxpass(3, 1)", "dobj(3, 5)", "root(0, 3)"],
+                   ["advmod(3, 2)", "auxpass(3, 1)", "det(6, 5)", "nsubjpass(3, 6)", "prep(3, 4)", "root(0, 3)"],
+                   ["advmod(3, 2)", "auxpass(3, 1)", "det(6, 5)", "prep_as(3, 6)", "root(0, 3)"],
+                   ["advmod(6, 5)", "advmod(4, 3)", "auxpass(4, 2)", "dobj(4, 6)", "nsubjpass(4, 1)", "root(0, 4)"],
+                   ["advmod(4, 3)", "auxpass(4, 2)", "det(7, 6)", "nsubjpass(4, 1)", "prep_as(4, 7)", "root(0, 4)"],
+                   ["advmod(4, 3)", "auxpass(4, 2)", "det(7, 6)", "nsubjpass(4, 1)", "prep_as(4, 7)", "root(0, 4)"],
+                   "owl:Thing", 
+                   "owl:Thing",
+                   "/philosophy"]
+
+    assert_equal(@blacksmith.extract_features(SENTENCES[0]), @features_0)
+
+    @features_1 = ["as a mass",
+                   ["CONPREP", "ADVERB", "NOUN"],
+                   "",
+                   [],
+                   "has",
+                   ["VERB"],
+                   "",
+                   [],
+                   "has regularly",
+                   ["VERB", "ADVERB"],
+                   ["det(3, 2)", "pobj(1, 3)", "root(0, 1)"],
+                   ["det(3, 2)", "npadvmod(4, 3)", "pobj(1, 4)", "root(0, 1)"],
+                   ["amod(4, 3)", "det(4, 2)", "pobj(1, 4)", "root(0, 1)"],
+                   ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"],
+                   ["dep(5, 1)", "det(4, 3)", "prep_as(1, 4)", "root(0, 5)"],
+                   ["amod(5, 4)", "det(5, 3)", "prep_as(1, 5)", "root(0, 1)"],
+                   "owl:Thing", 
+                   "owl:Thing",
+                   "/partOf"]
+
+    assert_equal(@blacksmith.extract_features(SENTENCES[1]), @features_1)
+
+    @features_2 = ["as a",
+                   ["CONPREP", "ADVERB"],
+                   "of",
+                   ["CONPREP"],
+                   "has",
+                   ["VERB"],
+                   "tendency of",
+                   ["NOUN", "CONPREP"],
+                   "has been",
+                   ["VERB", "VERB"],
+                   ["dep(1, 2)", "root(0, 1)"],
+                   ["det(3, 2)", "pobj(1, 3)", "root(0, 1)"],
+                   ["det(3, 2)", "pobj(1, 3)", "root(0, 1)"],
+                   ["advmod(3, 2)", "dobj(1, 3)", "root(0, 1)"],
+                   ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"],
+                   ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"],
+                   ["advmod(3, 2)", "pobj(1, 3)", "root(0, 1)"],
+                   ["advmod(4, 2)", "det(4, 3)", "pobj(1, 4)", "root(0, 1)"],
+                   ["cc(4, 2)", "det(4, 3)", "root(0, 4)"],
+                   "owl:Thing", 
+                   "owl:Thing",
+                   "/partOf"]
+
+    assert_equal(@blacksmith.extract_features(SENTENCES[2]), @features_2)
+  end
+
+  def should_convert_features_to_ml
+    return false
+    assert_equal(@blacksmith.convert_features_to_ml([@features_0, @features_1, @features_2]), [])
+  end
 end

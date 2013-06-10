@@ -93,8 +93,9 @@ class Blacksmith
     load_pos_tagger
   end
 
-  def initialize(sentences)
+  def initialize(sentences, classes_filename)
     @sentences = sentences
+    @classes = _load_object(classes_filename)
 
     load_libraries
   end
@@ -203,12 +204,14 @@ class Blacksmith
     return tags
   end
 
-  def pos_tag_windows(windows_info)
-    interest = windows_info["windows"][1]
-    
-    tagged_string = @pos_tagger.tagString(interest)
+  def pos_tag_sentence(sentence)
+    tagged_string = @pos_tagger.tagString(sentence)
 
     return extract_tags(tagged_string)
+  end
+
+  def pos_tag_windows(windows_info)
+    return pos_tag_sentence(windows_info["windows"][1])
   end
 
   def filter_dependency_path(dependency_path)
@@ -285,5 +288,56 @@ class Blacksmith
     end
 
     return dp_window
+  end
+
+  def extract_classes(window)
+    classes = [window["entities"][0][1], window["entities"][1][1]]
+
+    classes.map! {|c| @classes[c]}
+
+    classes.size.times do |i|
+      classes[i] = "owl:Thing" if classes[i].nil?
+    end
+
+    return classes
+  end
+
+  def extract_features(wikipedia_sentence)
+    sentence = wikipedia_sentence[0]
+    relation = wikipedia_sentence[1]
+    
+    windows = []
+    [0,1,2].each do |i|
+      windows.push(extract_windows(sentence, i))
+    end
+
+    middle = windows[0]["windows"][1]
+    pos_middle = pos_tag_sentence(middle)
+
+    left_1 = windows[1]["windows"][0]
+    pos_left_1 = pos_tag_sentence(left_1)
+    right_1 = windows[1]["windows"][2]
+    pos_right_1 = pos_tag_sentence(right_1)
+
+    left_2 = windows[2]["windows"][0]
+    pos_left_2 = pos_tag_sentence(left_2)
+    right_2 = windows[2]["windows"][2]
+    pos_right_2 = pos_tag_sentence(right_2)
+
+    dp = dependency_path_window(windows[2])
+
+    classes = extract_classes(windows[0])
+
+    features = [middle, pos_middle, left_1, pos_left_1, right_1, pos_right_1, left_2, pos_left_2, right_2, pos_right_2] 
+
+    dp.each do |d|
+      features.push(d)
+    end
+
+    features.push(classes[0])
+    features.push(classes[1])
+    features.push(relation)
+
+    return features
   end
 end
