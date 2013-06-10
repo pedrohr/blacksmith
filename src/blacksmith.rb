@@ -50,6 +50,9 @@ class Blacksmith
 
   attr_reader :dbpedia_info, :sentences
 
+  #Bag of Words
+  attr_reader :bow_sentences, :bow_classes, :bow_dp, :bow_pos
+
   def _load_object(filename)
     unless File.exists?(filename)
       return false
@@ -96,6 +99,11 @@ class Blacksmith
   def initialize(sentences, classes_filename)
     @sentences = sentences
     @classes = _load_object(classes_filename)
+
+    @bow_sentences = Hash.new()
+    @bow_classes = Hash.new()
+    @bow_dp = Hash.new()
+    @bow_pos = Hash.new()
 
     load_libraries
   end
@@ -328,16 +336,47 @@ class Blacksmith
 
     classes = extract_classes(windows[0])
 
-    features = [middle, pos_middle, left_1, pos_left_1, right_1, pos_right_1, left_2, pos_left_2, right_2, pos_right_2] 
+    return [middle, pos_middle, left_1, pos_left_1, right_1, pos_right_1, left_2, pos_left_2, right_2, pos_right_2, dp, classes[0], classes[1], relation]
+  end
 
-    dp.each do |d|
-      features.push(d)
+  def _populate_bow(search, bow, features_ml, i)
+    if bow[search].nil?
+      features_ml[i] = bow.size
+      bow[search] = features_ml[i]
+    else
+      features_ml[i] = bow[search]
     end
+  end
+  
+  def convert_features_to_ml(features_array)
+    ml = []
 
-    features.push(classes[0])
-    features.push(classes[1])
-    features.push(relation)
+    features_array.each do |fa|
+      features_ml = []
 
-    return features
+      [0,2,4,6,8].each do |i|
+        _populate_bow(fa[i], @bow_sentences, features_ml, i)
+      end
+
+      [1,3,5,7,9].each do |i|
+        _populate_bow(fa[i].join(""), @bow_pos, features_ml, i)
+      end
+
+      cnt = 10
+      fa[10].each do |path|
+        _populate_bow(path.join(""), @bow_dp, features_ml, cnt)
+        cnt += 1
+      end
+
+      [11, 12].each do |i|
+        _populate_bow(fa[i], @bow_classes, features_ml, cnt)
+        cnt += 1
+      end
+
+      features_ml[cnt] = fa[13]
+
+      ml.push(features_ml)
+    end
+    return ml
   end
 end

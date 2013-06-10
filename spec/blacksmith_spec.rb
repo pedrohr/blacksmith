@@ -81,7 +81,6 @@ class BlacksmitTest < Test::Unit::TestCase
     @blacksmith = BLACKSMITH
   end
 
-
   def test_should_load_sentences
     assert_equal(@blacksmith.sentences, @sentences)
   end
@@ -161,79 +160,81 @@ class BlacksmitTest < Test::Unit::TestCase
     assert_equal(@blacksmith.extract_classes({'entities' => [["", "/Autism"],["", "/Aristotle"]]}), ["/Disease", "/Philosopher"])
   end
 
+  FEATURES_0 = ["is often defined as a",  #0
+                ["VERB", "ADVERB", "VERB", "CONPREP", "ADVERB"], #0
+                "",  #1
+                [], #1
+                "which", #2
+                ["ADVERB"], #2
+                "", #1
+                [], #1
+                "which holds", #3
+                ["ADVERB", "VERB"], #3
+                [["advmod(5, 4)", "advmod(3, 2)", "auxpass(3, 1)", "dobj(3, 5)", "root(0, 3)"], #0
+                 ["advmod(3, 2)", "auxpass(3, 1)", "det(6, 5)", "nsubjpass(3, 6)", "prep(3, 4)", "root(0, 3)"], #1
+                 ["advmod(3, 2)", "auxpass(3, 1)", "det(6, 5)", "prep_as(3, 6)", "root(0, 3)"], #2
+                 ["advmod(6, 5)", "advmod(4, 3)", "auxpass(4, 2)", "dobj(4, 6)", "nsubjpass(4, 1)", "root(0, 4)"], #3
+                 ["advmod(4, 3)", "auxpass(4, 2)", "det(7, 6)", "nsubjpass(4, 1)", "prep_as(4, 7)", "root(0, 4)"], #4
+                 ["advmod(4, 3)", "auxpass(4, 2)", "det(7, 6)", "nsubjpass(4, 1)", "prep_as(4, 7)", "root(0, 4)"]], #4
+                "owl:Thing", #0
+                "owl:Thing", #0
+                "/philosophy"]
+
+  FEATURES_1 = ["as a mass", #4
+                ["CONPREP", "ADVERB", "NOUN"], #4
+                "", #1
+                [], #1
+                "has", #5
+                ["VERB"], #5
+                "", #1
+                [], #1
+                "has regularly", #6
+                ["VERB", "ADVERB"], #6
+                [["det(3, 2)", "pobj(1, 3)", "root(0, 1)"], #5
+                 ["det(3, 2)", "npadvmod(4, 3)", "pobj(1, 4)", "root(0, 1)"], #6
+                 ["amod(4, 3)", "det(4, 2)", "pobj(1, 4)", "root(0, 1)"], #7
+                 ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"], #8
+                 ["dep(5, 1)", "det(4, 3)", "prep_as(1, 4)", "root(0, 5)"], #9
+                 ["amod(5, 4)", "det(5, 3)", "prep_as(1, 5)", "root(0, 1)"]], #1
+                "owl:Thing",  #0
+                "owl:Thing", #0
+                "/partOf"]
+
+  FEATURES_2 = ["as a", #7
+                ["CONPREP", "ADVERB"], #7
+                "of", #8
+                ["CONPREP"], #8
+                "has", #5
+                ["VERB"], #5
+                "tendency of", #9
+                ["NOUN", "CONPREP"], #9
+                "has been", #10
+                ["VERB", "VERB"], #10
+                [["dep(1, 2)", "root(0, 1)"], #11
+                 ["det(3, 2)", "pobj(1, 3)", "root(0, 1)"], #5 
+                 ["det(3, 2)", "pobj(1, 3)", "root(0, 1)"], #5 
+                 ["advmod(3, 2)", "dobj(1, 3)", "root(0, 1)"], #12
+                 ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"], #8 
+                 ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"], #8 
+                 ["advmod(3, 2)", "pobj(1, 3)", "root(0, 1)"], #13
+                 ["advmod(4, 2)", "det(4, 3)", "pobj(1, 4)", "root(0, 1)"], #14
+                 ["cc(4, 2)", "det(4, 3)", "root(0, 4)"]], #15
+                "owl:Thing",  #0 
+                "owl:Thing", #0 
+                "/partOf"]
+
   def test_should_extract_features
-    @features_0 = ["is often defined as a",
-                   ["VERB", "ADVERB", "VERB", "CONPREP", "ADVERB"],
-                   "",
-                   [],
-                   "which",
-                   ["ADVERB"],
-                   "",
-                   [],
-                   "which holds",
-                   ["ADVERB", "VERB"],
-                   ["advmod(5, 4)", "advmod(3, 2)", "auxpass(3, 1)", "dobj(3, 5)", "root(0, 3)"],
-                   ["advmod(3, 2)", "auxpass(3, 1)", "det(6, 5)", "nsubjpass(3, 6)", "prep(3, 4)", "root(0, 3)"],
-                   ["advmod(3, 2)", "auxpass(3, 1)", "det(6, 5)", "prep_as(3, 6)", "root(0, 3)"],
-                   ["advmod(6, 5)", "advmod(4, 3)", "auxpass(4, 2)", "dobj(4, 6)", "nsubjpass(4, 1)", "root(0, 4)"],
-                   ["advmod(4, 3)", "auxpass(4, 2)", "det(7, 6)", "nsubjpass(4, 1)", "prep_as(4, 7)", "root(0, 4)"],
-                   ["advmod(4, 3)", "auxpass(4, 2)", "det(7, 6)", "nsubjpass(4, 1)", "prep_as(4, 7)", "root(0, 4)"],
-                   "owl:Thing", 
-                   "owl:Thing",
-                   "/philosophy"]
-
-    assert_equal(@blacksmith.extract_features(SENTENCES[0]), @features_0)
-
-    @features_1 = ["as a mass",
-                   ["CONPREP", "ADVERB", "NOUN"],
-                   "",
-                   [],
-                   "has",
-                   ["VERB"],
-                   "",
-                   [],
-                   "has regularly",
-                   ["VERB", "ADVERB"],
-                   ["det(3, 2)", "pobj(1, 3)", "root(0, 1)"],
-                   ["det(3, 2)", "npadvmod(4, 3)", "pobj(1, 4)", "root(0, 1)"],
-                   ["amod(4, 3)", "det(4, 2)", "pobj(1, 4)", "root(0, 1)"],
-                   ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"],
-                   ["dep(5, 1)", "det(4, 3)", "prep_as(1, 4)", "root(0, 5)"],
-                   ["amod(5, 4)", "det(5, 3)", "prep_as(1, 5)", "root(0, 1)"],
-                   "owl:Thing", 
-                   "owl:Thing",
-                   "/partOf"]
-
-    assert_equal(@blacksmith.extract_features(SENTENCES[1]), @features_1)
-
-    @features_2 = ["as a",
-                   ["CONPREP", "ADVERB"],
-                   "of",
-                   ["CONPREP"],
-                   "has",
-                   ["VERB"],
-                   "tendency of",
-                   ["NOUN", "CONPREP"],
-                   "has been",
-                   ["VERB", "VERB"],
-                   ["dep(1, 2)", "root(0, 1)"],
-                   ["det(3, 2)", "pobj(1, 3)", "root(0, 1)"],
-                   ["det(3, 2)", "pobj(1, 3)", "root(0, 1)"],
-                   ["advmod(3, 2)", "dobj(1, 3)", "root(0, 1)"],
-                   ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"],
-                   ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"],
-                   ["advmod(3, 2)", "pobj(1, 3)", "root(0, 1)"],
-                   ["advmod(4, 2)", "det(4, 3)", "pobj(1, 4)", "root(0, 1)"],
-                   ["cc(4, 2)", "det(4, 3)", "root(0, 4)"],
-                   "owl:Thing", 
-                   "owl:Thing",
-                   "/partOf"]
-
-    assert_equal(@blacksmith.extract_features(SENTENCES[2]), @features_2)
+    assert_equal(@blacksmith.extract_features(SENTENCES[0]), FEATURES_0)
+    assert_equal(@blacksmith.extract_features(SENTENCES[1]), FEATURES_1)
+    assert_equal(@blacksmith.extract_features(SENTENCES[2]), FEATURES_2)
   end
 
-  def should_convert_features_to_ml
-    return false
-    assert_equal(@blacksmith.convert_features_to_ml([@features_0, @features_1, @features_2]), [])
+  def test_should_convert_features_to_ml
+    assert_equal(@blacksmith.bow_sentences, {})
+    assert_equal(@blacksmith.bow_classes, {})
+    assert_equal(@blacksmith.bow_dp, {})
+    assert_equal(@blacksmith.bow_pos, {})
+    
+    assert_equal(@blacksmith.convert_features_to_ml([FEATURES_0, FEATURES_1, FEATURES_2]), [[0,0,1,1,2,2,1,1,3,3,0,1,2,3,4,4,0,0, "/philosophy"], [4,4,1,1,5,5,1,1,6,6,5,6,7,8,9,10,0,0,"/partOf"],[7,7,8,8,5,5,9,9,10,10,11,5,5,12,8,8,13,14,15,0,0,"/partOf"]])
   end
 end
