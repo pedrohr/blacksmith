@@ -55,7 +55,7 @@ class Blacksmith
 
   def _load_object(filename)
     unless File.exists?(filename)
-      return false
+      return {}
     end
 
     begin
@@ -64,7 +64,7 @@ class Blacksmith
       file.close
       return obj
     rescue
-      return false
+      return {}
     end
   end
 
@@ -91,19 +91,16 @@ class Blacksmith
   end
 
   def load_libraries
-    Rjb::load('lib/stanford-parser-postagger.jar', ['-Xmx256m'])
+    Rjb::load('lib/stanford-parser-postagger.jar', ['-Xmx1024m'])
     load_stanford_parser
     load_pos_tagger
   end
 
-  def initialize(sentences, classes_filename)
+  def initialize(sentences, classes_filename, bow_path)
     @sentences = sentences
     @classes = _load_object(classes_filename)
 
-    @bow_sentences = Hash.new()
-    @bow_classes = Hash.new()
-    @bow_dp = Hash.new()
-    @bow_pos = Hash.new()
+    @bow_path = bow_path
 
     load_libraries
   end
@@ -243,24 +240,13 @@ class Blacksmith
       parse = @lexicalized_parser.apply(sentence)
       dp = @grammaticalStructureFactory.newGrammaticalStructure(parse).typedDependenciesCCprocessed().toString()
 
-      dp = dp[1..dp.size-2]
+      dp.gsub!('[', '["')
+      dp.gsub!(']', '"]')
+      dp.gsub!('),', ')","')
 
-      dp = dp.split(",")
-
-      path = []
-      component = ""
-      push = false
-      dp.each do |el|
-        unless push
-          component = el
-          push = true
-        else
-          path.push((component + "," + el).strip)
-          push = false
-          component = ""
-        end
-      end
-
+      path = eval dp
+      path.map! {|e| e.strip}
+      
       paths.push(path.sort)
     end
 
@@ -377,6 +363,39 @@ class Blacksmith
 
       ml.push(features_ml)
     end
+
     return ml
+  end
+
+  def extract_ml_features_from_sentences
+    pp "Loading BOW files..."
+    @bow_sentences = _load_object("#{@bow_path}/bow_sentences_dump.gz")
+    @bow_classes = _load_object("#{@bow_path}/bow_classes_dump.gz")
+    @bow_dp = _load_object("#{@bow_path}/bow_dp_dump.gz")
+    @bow_pos = _load_object("#{@bow_path}/bow_pos_dump.gz")
+
+    features_array = []
+    i = 1
+    @sentences.each do |sentence|
+      print "\rExtracting features of sentence #{i} of #{sentences.size}"
+      features_array.push(extract_features(sentence))
+      i += 1
+    end
+
+    features_to_ml = convert_features_to_ml(features_array)
+
+    pp "Creating BOW hashes dump..."
+    bow_sentences_dump = Marshal.dump(@bow_sentences)
+    bow_pos_dump = Marshal.dump(@bow_pos)
+    bow_dp_dump = Marshal.dump(@bow_dp)
+    bow_classes_dump = Marshal.dump(@bow_classes)
+
+    pp "Writing BOW hashes into disk..."
+    File.open("#{@bow_path}/bow_sentences_dump.gz", "w") {|f| f.write(bow_sentences_dump)}
+    File.open("#{@bow_path}/bow_pos_dump.gz", "w") {|f| f.write(bow_pos_dump)}
+    File.open("#{@bow_path}/bow_dp_dump.gz", "w") {|f| f.write(bow_dp_dump)}
+    File.open("#{@bow_path}/bow_classes_dump.gz", "w") {|f| f.write(bow_classes_dump)}
+    
+    return features_to_ml
   end
 end

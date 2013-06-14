@@ -23,8 +23,9 @@ WINDOWS_SIZE_2 = [{"windows" => ["", "is often defined as a", "which holds"], "e
     #  {"/Political_philosophy" => "/philosophy", "/Social_movement" => "/partOf"},
     #  "/Irving_Shulman"=> {"/Rebel_without_a_case" => "/wrote"}}
 
+PATH = "./spec/mocks/tests"
 
-BLACKSMITH = Blacksmith.new(SENTENCES, "./spec/mocks/classes.gz")
+BLACKSMITH = Blacksmith.new(SENTENCES, "./spec/mocks/classes.gz", PATH)
 
 CLASSES_MOCK = {"/Autism" => "/Disease", "/Animal_Farm" => "/Book", "/Aristotle" => "/Philosopher"}
 
@@ -92,6 +93,10 @@ class BlacksmitTest < Test::Unit::TestCase
   end
 
   def test_should_extract_windows
+    assert_equal(@blacksmith.extract_windows("In 1900, <Alabama/Alabama> had more than 181,000 African <American/English_American>s eligible to vote", 2), {"windows"=>["In 1900,", "had more than 181,000 African", "s eligible"],
+ "entities"=>[["Alabama", "/Alabama"], ["American", "/English_American"]]})
+
+    
     [0,1,2].each do |i|
       assert_equal(@blacksmith.extract_windows(@sentences[i][0], 0), WINDOWS_SIZE_0[i])
     end
@@ -124,6 +129,7 @@ class BlacksmitTest < Test::Unit::TestCase
 
   # collapsed dependency path
   def test_should_extract_dependency_path
+    assert_equal(@blacksmith.dependency_path(" had more than 181,000 African "), ["amod(181,000-4, African-5)", "dobj(had-1, 181,000-4)", "mwe(than-3, more-2)", "quantmod(181,000-4, than-3)", "root(ROOT-0, had-1)"])
     assert_equal(@blacksmith.dependency_path("Astronomer Edwin Hubble was born in Marshfield, Missourdi."), ["auxpass(born-5, was-4)", "nn(Hubble-3, Astronomer-1)", "nn(Hubble-3, Edwin-2)", "nn(Missourdi-9, Marshfield-7)", "nsubjpass(born-5, Hubble-3)", "prep_in(born-5, Missourdi-9)", "root(ROOT-0, born-5)"])
     assert_equal(@blacksmith.dependency_path("Anarchism is often defined as a political philosophy"), ["advmod(defined-4, often-3)", "amod(philosophy-8, political-7)", "auxpass(defined-4, is-2)", "det(philosophy-8, a-6)", "nsubjpass(defined-4, Anarchism-1)", "prep_as(defined-4, philosophy-8)", "root(ROOT-0, defined-4)"])
     assert_equal(@blacksmith.dependency_path("Anarchism as a mass social movement"), ["amod(movement-6, mass-4)", "amod(movement-6, social-5)", "det(movement-6, a-3)", "prep_as(Anarchism-1, movement-6)", "root(ROOT-0, Anarchism-1)"])
@@ -229,12 +235,18 @@ class BlacksmitTest < Test::Unit::TestCase
     assert_equal(@blacksmith.extract_features(SENTENCES[2]), FEATURES_2)
   end
 
-  def test_should_convert_features_to_ml
-    assert_equal(@blacksmith.bow_sentences, {})
-    assert_equal(@blacksmith.bow_classes, {})
-    assert_equal(@blacksmith.bow_dp, {})
-    assert_equal(@blacksmith.bow_pos, {})
-    
-    assert_equal(@blacksmith.convert_features_to_ml([FEATURES_0, FEATURES_1, FEATURES_2]), [[0,0,1,1,2,2,1,1,3,3,0,1,2,3,4,4,0,0, "/philosophy"], [4,4,1,1,5,5,1,1,6,6,5,6,7,8,9,10,0,0,"/partOf"],[7,7,8,8,5,5,9,9,10,10,11,5,5,12,8,8,13,14,15,0,0,"/partOf"]])
+
+  def test_should_extract_ml_features_from_sentences
+    assert_equal(@blacksmith.extract_ml_features_from_sentences, [[0,0,1,1,2,2,1,1,3,3,0,1,2,3,4,4,0,0, "/philosophy"], [4,4,1,1,5,5,1,1,6,6,5,6,7,8,9,10,0,0,"/partOf"], [7,7,8,8,5,5,9,9,10,10,11,5,5,12,8,8,13,14,15,0,0,"/partOf"]])
+
+    assert_equal(@blacksmith.bow_sentences.nil?, false)
+    assert_equal(@blacksmith.bow_classes.nil?, false)
+    assert_equal(@blacksmith.bow_dp.nil?, false)
+    assert_equal(@blacksmith.bow_pos.nil?, false)
+
+    assert(File.exists?("#{PATH}/bow_sentences_dump.gz"))
+    assert(File.exists?("#{PATH}/bow_pos_dump.gz"))
+    assert(File.exists?("#{PATH}/bow_dp_dump.gz"))
+    assert(File.exists?("#{PATH}/bow_classes_dump.gz"))
   end
 end
