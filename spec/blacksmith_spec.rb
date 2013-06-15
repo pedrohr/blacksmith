@@ -230,6 +230,7 @@ class BlacksmitTest < Test::Unit::TestCase
                 "/partOf"]
 
   def test_should_extract_features
+    assert_equal(@blacksmith.extract_features(["Among the historical tribes of Native American people living in the area of present-day Alabama at the time of European contact were Iroquoian-speaking Cherokee, and the Muskogean-speaking Alabama (\"Alibamu\"), <Chickasaw/Chickasaw>, <Choctaw/Choctaw>, Creek, and Koasati", "/related"]), [",", ["ELSE"], "(\"Alibamu\"),", [nil, "ELSE", "NOUN", "ELSE", nil, "ELSE"], ",", ["ELSE"], "Alabama (\"Alibamu\"),", ["NOUN", nil, "ELSE", "NOUN", "ELSE", nil, "ELSE"], ", Creek,", ["ELSE", "NOUN", "ELSE"], [[""],  [""],  [""],  ["root(0, 1)"],  ["appos(1, 3)", "root(0, 1)"],  ["root(0, 1)"],  ["dep(6, 3)"],  ["dep(6, 3)", "dep(6, 8)"],  [""]], "owl:Thing", "owl:Thing", "/related"])
     assert_equal(@blacksmith.extract_features(SENTENCES[0]), FEATURES_0)
     assert_equal(@blacksmith.extract_features(SENTENCES[1]), FEATURES_1)
     assert_equal(@blacksmith.extract_features(SENTENCES[2]), FEATURES_2)

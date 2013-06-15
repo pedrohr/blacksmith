@@ -222,10 +222,19 @@ class Blacksmith
   def filter_dependency_path(dependency_path)
     filtered_dp = []
     dependency_path.each do |rel|
-      rel = rel.split("(")
-      indexes = rel[1].scan(/\d/)
-      filtered_dp.push(rel[0] + "(" + indexes[0] + ", " + indexes[1] + ")")
+      if rel == ""
+        filtered_dp.push(rel)
+      else
+        rel = rel.split("(")
+        if rel.nil?
+          pp dependency_path
+          pp rel
+        end
+        indexes = rel[1].scan(/\d/)
+        filtered_dp.push(rel[0] + "(" + indexes[0] + ", " + indexes[1] + ")")
+      end
     end
+  
     return filtered_dp
   end
 
@@ -240,14 +249,18 @@ class Blacksmith
       parse = @lexicalized_parser.apply(sentence)
       dp = @grammaticalStructureFactory.newGrammaticalStructure(parse).typedDependenciesCCprocessed().toString()
 
-      dp.gsub!('[', '["')
-      dp.gsub!(']', '"]')
-      dp.gsub!('),', ')","')
-
-      path = eval dp
-      path.map! {|e| e.strip}
-      
-      paths.push(path.sort)
+      if dp != "[]"
+        dp.gsub!('[', '["')
+        dp.gsub!(']', '"]')
+        dp.gsub!('),', ')","')
+        
+        path = eval dp
+        path.map! {|e| e.strip}
+        
+        paths.push(path.sort)
+      else
+        paths.push([""])
+      end
     end
 
     return paths.flatten
@@ -378,7 +391,11 @@ class Blacksmith
     i = 1
     @sentences.each do |sentence|
       print "\rExtracting features of sentence #{i} of #{sentences.size}"
-      features_array.push(extract_features(sentence))
+      begin
+        features_array.push(extract_features(sentence))
+      rescue
+        pp sentence
+      end
       i += 1
     end
 
