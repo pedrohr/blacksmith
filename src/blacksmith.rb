@@ -282,7 +282,7 @@ class Blacksmith
     end
 
     rw = window_size_2["windows"][2].split(" ").reverse!
-    while right_window.size < 3 and lw.size != 0 do
+    while right_window.size < 3 and rw.size != 0 do
       right_window.push(rw.pop)
     end
 
