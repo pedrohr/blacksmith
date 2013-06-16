@@ -231,6 +231,8 @@ class BlacksmitTest < Test::Unit::TestCase
 
   def test_should_extract_features
     assert_equal(@blacksmith.extract_features(["Among the historical tribes of Native American people living in the area of present-day Alabama at the time of European contact were Iroquoian-speaking Cherokee, and the Muskogean-speaking Alabama (\"Alibamu\"), <Chickasaw/Chickasaw>, <Choctaw/Choctaw>, Creek, and Koasati", "/related"]), [",", ["ELSE"], "(\"Alibamu\"),", [nil, "ELSE", "NOUN", "ELSE", nil, "ELSE"], ",", ["ELSE"], "Alabama (\"Alibamu\"),", ["NOUN", nil, "ELSE", "NOUN", "ELSE", nil, "ELSE"], ", Creek,", ["ELSE", "NOUN", "ELSE"], [[""],  [""],  [""],  ["root(0, 1)"],  ["appos(1, 3)", "root(0, 1)"],  ["root(0, 1)"],  ["dep(6, 3)"],  ["dep(6, 3)", "dep(6, 8)"],  [""]], "owl:Thing", "owl:Thing", "/related"])
+    assert_equal(@blacksmith.extract_features(["Later in life, Mary struggled with the stresses of losing her husband and sons, and <Robert/Robert_Todd_Lincoln> <Lincoln/Abraham_Lincoln> committed her temporarily to a mental health asylum in 1875",
+ "/child"]), ["", [], "and", ["CONPREP"], "committed", ["VERB"], "sons, and", ["NOUN", "ELSE", "CONPREP"], "committed her", ["VERB", "NOUN"], [[],  ["root(0, 1)"],  ["root(0, 1)"],  ["root(0, 1)"],  ["nn(2, 1)", "root(0, 2)"],  ["dep(2, 1)", "root(0, 2)"],  ["root(0, 1)"],  ["nn(2, 1)", "root(0, 2)"],  ["cc(2, 1)", "root(0, 2)"]], "owl:Thing", "owl:Thing", "/child"])
     assert_equal(@blacksmith.extract_features(SENTENCES[0]), FEATURES_0)
     assert_equal(@blacksmith.extract_features(SENTENCES[1]), FEATURES_1)
     assert_equal(@blacksmith.extract_features(SENTENCES[2]), FEATURES_2)

@@ -281,7 +281,7 @@ class Blacksmith
       left_window.push(lw.pop)
     end
 
-    rw = window_size_2["windows"][1].split(" ").reverse!
+    rw = window_size_2["windows"][2].split(" ").reverse!
     while right_window.size < 3 and lw.size != 0 do
       right_window.push(rw.pop)
     end
@@ -289,8 +289,8 @@ class Blacksmith
     dp_window = []
     left_window.each do |l|
       right_window.each do |r|
-        sentence = l + " " + window_size_2["windows"][1] + " " + r
-        dp_window.push(filter_dependency_path(dependency_path(sentence)))
+          sentence = l + " " + window_size_2["windows"][1] + " " + r
+          dp_window.push(filter_dependency_path(dependency_path(sentence)))
       end
     end
 
