@@ -89,7 +89,7 @@ class Blacksmith
     @javaDocPreProcessor = DocumentPreprocessor
     @javaStringReader = StringReader
 
-    @lexicalized_parser = LexicalizedParser.loadModel("lib/stanford-parser-2013-04-05/englishPCFG.ser.gz")
+    @lexicalized_parser = LexicalizedParser.loadModel("lib/stanford-parser-2013-04-05/englishPCFG.ser.gz", "-retainTmpSubcategories")
     @grammaticalStructureFactory = PennTreebankLanguagePack.new().grammaticalStructureFactory()
   end
 
@@ -283,9 +283,17 @@ class Blacksmith
       left_window.push(lw.pop)
     end
 
+    while left_window.size < 3
+      left_window.push("")
+    end
+
     rw = window_size_2["windows"][2].split(" ").reverse!
     while right_window.size < 3 and rw.size != 0 do
       right_window.push(rw.pop)
+    end
+
+    while right_window.size < 3
+      right_window.push("")
     end
 
     dp_window = []
@@ -337,7 +345,10 @@ class Blacksmith
 
     classes = extract_classes(windows[0])
 
-    return [middle, pos_middle, left_1, pos_left_1, right_1, pos_right_1, left_2, pos_left_2, right_2, pos_right_2, dp, classes[0], classes[1], relation]
+    return [middle, pos_middle, left_1, pos_left_1, right_1, pos_right_1, left_2, pos_left_2, right_2, pos_right_2, 
+#classes[0], classes[1], relation]
+dp, classes[0], classes[1], relation]
+ 
   end
 
   def _populate_bow(search, bow, features_ml, i)
@@ -382,7 +393,19 @@ class Blacksmith
     return ml
   end
 
-  def extract_ml_features_from_sentences
+  def split_sentences(vec, num)
+    splits = []
+    s = vec.size/num
+    
+    (num-1).times do |i|
+      splits.push(vec[(i*s)..(i*s + s - 1)].dup)
+    end
+    
+    splits.push(vec[(num-1)*s..vec.size-1])
+    return splits
+  end
+
+  def extract_ml_features_from_sentences(num_threads)
     pp "Loading BOW files..."
     @bow_sentences = _load_object("#{@bow_path}/bow_sentences_dump.gz")
     @bow_classes = _load_object("#{@bow_path}/bow_classes_dump.gz")
@@ -390,17 +413,39 @@ class Blacksmith
     @bow_pos = _load_object("#{@bow_path}/bow_pos_dump.gz")
 
     features_array = []
-    i = 1
-    @sentences.each do |sentence|
-      print "\rExtracting features of sentence #{i} of #{sentences.size}"
-      begin
-        features_array.push(extract_features(sentence))
-      rescue
-        pp sentence
-      end
-      i += 1
+
+    split = split_sentences(@sentences, num_threads)
+
+    output = []
+    num_threads.times do |i|
+      output[i] = []
     end
 
+    threads = []
+
+    pp "Processing... this will take LOTS of HOURS!!!"
+    num_threads.times do |i|
+      threads[i] = Thread.new {
+        j = 0
+        split[i].each do |sentence|
+          split_size = split[i].size
+          begin
+            puts "#{j} #{i}"
+            output[i].push(extract_features(sentence))
+          rescue
+            pp sentence
+          end
+          j += 1
+        end
+      }
+    end
+
+    threads.each {|t| t.join }
+    
+    num_threads.times do |i|
+      features_array += output[i]
+    end
+    
     features_to_ml = convert_features_to_ml(features_array)
 
     pp "Creating BOW hashes dump..."

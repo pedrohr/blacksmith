@@ -176,12 +176,7 @@ class BlacksmitTest < Test::Unit::TestCase
                 [], #1
                 "which holds", #3
                 ["ADVERB", "VERB"], #3
-                [["advmod(5, 4)", "advmod(3, 2)", "auxpass(3, 1)", "dobj(3, 5)", "root(0, 3)"], #0
-                 ["advmod(3, 2)", "auxpass(3, 1)", "det(6, 5)", "nsubjpass(3, 6)", "prep(3, 4)", "root(0, 3)"], #1
-                 ["advmod(3, 2)", "auxpass(3, 1)", "det(6, 5)", "prep_as(3, 6)", "root(0, 3)"], #2
-                 ["advmod(6, 5)", "advmod(4, 3)", "auxpass(4, 2)", "dobj(4, 6)", "nsubjpass(4, 1)", "root(0, 4)"], #3
-                 ["advmod(4, 3)", "auxpass(4, 2)", "det(7, 6)", "nsubjpass(4, 1)", "prep_as(4, 7)", "root(0, 4)"], #4
-                 ["advmod(4, 3)", "auxpass(4, 2)", "det(7, 6)", "nsubjpass(4, 1)", "prep_as(4, 7)", "root(0, 4)"]], #4
+                [["advmod(5, 4)",   "advmod(3, 2)",   "auxpass(3, 1)",   "dobj(3, 5)",   "root(0, 3)"],  ["advmod(3, 2)",   "auxpass(3, 1)",   "det(6, 5)",   "nsubjpass(3, 6)",   "prep(3, 4)",   "root(0, 3)"],  ["advmod(3, 2)",   "auxpass(3, 1)",   "det(6, 5)",   "prep_as(3, 6)",   "root(0, 3)"],  ["advmod(6, 5)",   "advmod(4, 3)",   "auxpass(4, 2)",   "dobj(4, 6)",   "nsubjpass(4, 1)",   "root(0, 4)"],  ["advmod(4, 3)",   "auxpass(4, 2)",   "det(7, 6)",   "nsubjpass(4, 1)",   "prep_as(4, 7)",   "root(0, 4)"],  ["advmod(4, 3)",   "auxpass(4, 2)",   "det(7, 6)",   "nsubjpass(4, 1)",   "prep_as(4, 7)",   "root(0, 4)"],  ["advmod(5, 4)",   "advmod(3, 2)",   "auxpass(3, 1)",   "dobj(3, 5)",   "root(0, 3)"],  ["advmod(3, 2)",   "auxpass(3, 1)",   "det(6, 5)",   "nsubjpass(3, 6)",   "prep(3, 4)",   "root(0, 3)"],  ["advmod(3, 2)",   "auxpass(3, 1)",   "det(6, 5)",   "prep_as(3, 6)",   "root(0, 3)"]], #4
                 "owl:Thing", #0
                 "owl:Thing", #0
                 "/philosophy"]
@@ -196,12 +191,15 @@ class BlacksmitTest < Test::Unit::TestCase
                 [], #1
                 "has regularly", #6
                 ["VERB", "ADVERB"], #6
-                [["det(3, 2)", "pobj(1, 3)", "root(0, 1)"], #5
-                 ["det(3, 2)", "npadvmod(4, 3)", "pobj(1, 4)", "root(0, 1)"], #6
-                 ["amod(4, 3)", "det(4, 2)", "pobj(1, 4)", "root(0, 1)"], #7
-                 ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"], #8
-                 ["dep(5, 1)", "det(4, 3)", "prep_as(1, 4)", "root(0, 5)"], #9
-                 ["amod(5, 4)", "det(5, 3)", "prep_as(1, 5)", "root(0, 1)"]], #1
+                [["det(3, 2)", "pobj(1, 3)", "root(0, 1)"],
+                 ["det(3, 2)", "npadvmod(4, 3)", "pobj(1, 4)", "root(0, 1)"],
+                 ["amod(4, 3)", "det(4, 2)", "pobj(1, 4)", "root(0, 1)"],
+                 ["det(4, 3)", "prep_as(1, 4)", "root(0, 1)"],
+                 ["dep(5, 1)", "det(4, 3)", "prep_as(1, 4)", "root(0, 5)"],
+                 ["amod(5, 4)", "det(5, 3)", "prep_as(1, 5)", "root(0, 1)"],
+                 ["det(3, 2)", "pobj(1, 3)", "root(0, 1)"],
+                 ["det(3, 2)", "npadvmod(4, 3)", "pobj(1, 4)", "root(0, 1)"],
+                 ["amod(4, 3)", "det(4, 2)", "pobj(1, 4)", "root(0, 1)"]], #1
                 "owl:Thing",  #0
                 "owl:Thing", #0
                 "/partOf"]
@@ -230,7 +228,7 @@ class BlacksmitTest < Test::Unit::TestCase
                 "/partOf"]
 
   def test_should_extract_features
-    assert_equal(@blacksmith.extract_features(["\" Over the next seventeen months, he would be imprisoned in the concentration camps at Sonnenburg, <Brandenburg/Brandenburg> and finally, <Oranienburg/Oranienburg>", "/federalState"]), ["and finally,", ["CONPREP", "ADVERB", "ELSE"], "Sonnenburg,", ["NOUN", "ELSE"], "", [], "at Sonnenburg,", ["CONPREP", "NOUN", "ELSE"], "", [], [["dep(1, 2)", "root(0, 1)"],  ["cc(2, 1)", "dep(2, 4)", "root(0, 2)"],  ["nn(2, 1)", "nsubj(3, 2)", "root(0, 3)"],  ["appos(1, 5)", "conj_and(1, 3)", "root(0, 1)"],  ["cc(4, 3)", "dep(1, 4)", "root(0, 1)"],  ["amod(6, 1)", "cc(4, 3)", "dep(1, 4)", "root(0, 6)"]], "owl:Thing", "owl:Thing", "/federalState"])
+    assert_equal(@blacksmith.extract_features(["\" Over the next seventeen months, he would be imprisoned in the concentration camps at Sonnenburg, <Brandenburg/Brandenburg> and finally, <Oranienburg/Oranienburg>", "/federalState"]), ["and finally,", ["CONPREP", "ADVERB", "ELSE"], "Sonnenburg,", ["NOUN", "ELSE"], "", [], "at Sonnenburg,", ["CONPREP", "NOUN", "ELSE"], "", [], [["dep(1, 2)", "root(0, 1)"],  ["cc(2, 1)", "dep(2, 4)", "root(0, 2)"],  ["dep(1, 2)", "root(0, 1)"],  ["nn(2, 1)", "nsubj(3, 2)", "root(0, 3)"],  ["appos(1, 5)", "conj_and(1, 3)", "root(0, 1)"],  ["nn(2, 1)", "nsubj(3, 2)", "root(0, 3)"],  ["cc(4, 3)", "dep(1, 4)", "root(0, 1)"],  ["amod(6, 1)", "cc(4, 3)", "dep(1, 4)", "root(0, 6)"], ["cc(4, 3)", "dep(1, 4)", "root(0, 1)"]], "owl:Thing", "owl:Thing", "/federalState"])
     assert_equal(@blacksmith.extract_features(["Among the historical tribes of Native American people living in the area of present-day Alabama at the time of European contact were Iroquoian-speaking Cherokee, and the Muskogean-speaking Alabama (\"Alibamu\"), <Chickasaw/Chickasaw>, <Choctaw/Choctaw>, Creek, and Koasati", "/related"]), [",", ["ELSE"], "(\"Alibamu\"),", [nil, "ELSE", "NOUN", "ELSE", nil, "ELSE"], ",", ["ELSE"], "Alabama (\"Alibamu\"),", ["NOUN", nil, "ELSE", "NOUN", "ELSE", nil, "ELSE"], ", Creek,", ["ELSE", "NOUN", "ELSE"], [[""],  [""],  [""],  ["root(0, 1)"],  ["appos(1, 3)", "root(0, 1)"],  ["root(0, 1)"],  ["dep(6, 3)"],  ["dep(6, 3)", "dep(6, 8)"],  [""]], "owl:Thing", "owl:Thing", "/related"])
     assert_equal(@blacksmith.extract_features(["Later in life, Mary struggled with the stresses of losing her husband and sons, and <Robert/Robert_Todd_Lincoln> <Lincoln/Abraham_Lincoln> committed her temporarily to a mental health asylum in 1875",
  "/child"]), ["", [], "and", ["CONPREP"], "committed", ["VERB"], "sons, and", ["NOUN", "ELSE", "CONPREP"], "committed her", ["VERB", "NOUN"], [[],  ["root(0, 1)"],  ["root(0, 1)"],  ["root(0, 1)"],  ["nn(2, 1)", "root(0, 2)"],  ["dep(2, 1)", "root(0, 2)"],  ["root(0, 1)"],  ["nn(2, 1)", "root(0, 2)"],  ["cc(2, 1)", "root(0, 2)"]], "owl:Thing", "owl:Thing", "/child"])
@@ -241,7 +239,7 @@ class BlacksmitTest < Test::Unit::TestCase
 
 
   def test_should_extract_ml_features_from_sentences
-    assert_equal(@blacksmith.extract_ml_features_from_sentences, [[0,0,1,1,2,2,1,1,3,3,0,1,2,3,4,4,0,0, "/philosophy"], [4,4,1,1,5,5,1,1,6,6,5,6,7,8,9,10,0,0,"/partOf"], [7,7,8,8,5,5,9,9,10,10,11,5,5,12,8,8,13,14,15,0,0,"/partOf"]])
+    assert_equal(@blacksmith.extract_ml_features_from_sentences(1), [[0,  0,  1,  1,  2,  2,  1,  1, 3,  3,  0,  1,  2,  3,  4,  4,  0,  1,  2,  0,  0,  "/philosophy"], [4, 4, 1, 1, 5, 5, 1, 1, 6, 6, 5, 6, 7, 8, 9, 10, 5, 6, 7, 0, 0, "/partOf"], [7,  7,  8,  8,  5,  5,  9,  9,  10,  10,  11,  5,  5,  12,  8,  8,  13,  14,  15,  0,  0,  "/partOf"]])
 
     assert_equal(@blacksmith.bow_sentences.nil?, false)
     assert_equal(@blacksmith.bow_classes.nil?, false)
@@ -253,4 +251,9 @@ class BlacksmitTest < Test::Unit::TestCase
     assert(File.exists?("#{PATH}/bow_dp_dump.gz"))
     assert(File.exists?("#{PATH}/bow_classes_dump.gz"))
   end
+
+  def test_should_split_sentences
+    assert_equal(@blacksmith.split_sentences([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], 8), [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9], [10, 11], [12, 13], [14, 15, 16]])
+  end
+
 end
